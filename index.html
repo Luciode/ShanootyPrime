@@ -1,0 +1,827 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Ask You Out 💚</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;700&display=swap');
+
+  :root {
+    --mint: #a8d5ba;
+    --sage: #8cae7e;
+    --emerald: #4a774b;
+    --background: #e9f4ea;
+    --button-bg: #b8d8c0;
+    --button-hover: #a2c4a4;
+    --text-color: #335533;
+  }
+
+  * {
+    box-sizing: border-box;
+  }
+
+  body {
+    margin: 0;
+    background: var(--background);
+    font-family: 'Poppins', sans-serif;
+    color: var(--text-color);
+    display: flex;
+    min-height: 100vh;
+    overflow-x: hidden;
+    position: relative;
+  }
+
+  main {
+    flex: 1 1 auto;
+    max-width: 600px;
+    margin: 2rem;
+    background: white;
+    border-radius: 15px;
+    box-shadow: 0 8px 20px rgba(50, 80, 40, 0.25);
+    padding: 2.5rem 2rem;
+    text-align: center;
+    z-index: 2;
+    margin-right: 200px; /* Make room for sidebar */
+  }
+
+  h1, h2 {
+    margin: 0;
+    font-weight: 700;
+  }
+
+  h1 {
+    font-size: 2.25rem;
+    margin-bottom: 1rem;
+  }
+
+  #introMessage {
+    font-size: 1.25rem;
+  }
+
+  button {
+    cursor: pointer;
+    background: var(--button-bg);
+    color: var(--emerald);
+    border: none;
+    font-weight: 700;
+    font-size: 1.2rem;
+    padding: 0.75rem 1.8rem;
+    border-radius: 50px;
+    box-shadow: 0 5px 10px rgba(100, 160, 110, 0.3);
+    transition: background 0.3s ease;
+    margin-top: 1.5rem;
+    user-select: none;
+  }
+
+  button:hover, button:focus {
+    background: var(--button-hover);
+    outline: none;
+  }
+
+  #revealMessage {
+    margin-top: 2rem;
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: var(--emerald);
+    display: none;
+  }
+
+  #responseButtons {
+    margin-top: 2rem;
+    display: none;
+    gap: 1rem;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  #responseButtons button {
+    width: 120px;
+  }
+
+  #responseMessage {
+    margin-top: 1.5rem;
+    font-size: 1.1rem;
+    color: var(--sage);
+  }
+
+  #smile {
+    margin-top: 2rem;
+    font-size: 1rem;
+    color: var(--emerald);
+    opacity: 0;
+    transition: opacity 0.6s ease;
+  }
+
+  #smile.show {
+    opacity: 1;
+    animation: smileBounce 1s ease forwards;
+  }
+
+  @keyframes smileBounce {
+    0% { transform: translateY(20px) scale(0.8); opacity: 0; }
+    50% { transform: translateY(-10px) scale(1.1); opacity: 1; }
+    100% { transform: translateY(0) scale(1); opacity: 1; }
+  }
+
+  /* Floating hearts */
+  #heart-container {
+    position: fixed;
+    top: 0; left: 0; width: 100%; height: 100%;
+    pointer-events: none;
+    overflow: visible;
+    z-index: 0;
+  }
+  .heart {
+    position: absolute;
+    width: 24px;
+    height: 24px;
+    background: var(--mint);
+    transform: rotate(-45deg);
+    cursor: pointer;
+    user-select: none;
+    animation-name: floatUp;
+    animation-timing-function: linear;
+    animation-fill-mode: forwards;
+    pointer-events: auto; /* allow clicks */
+  }
+  .heart:before,
+  .heart:after {
+    content: "";
+    position: absolute;
+    width: 24px;
+    height: 24px;
+    background: var(--mint);
+    border-radius: 50%;
+  }
+  .heart:before {
+    top: 0;
+    left: 12px;
+  }
+  .heart:after {
+    left: 0;
+    top: 12px;
+  }
+  @keyframes floatUp {
+    0% {
+      opacity: 1;
+      transform: translateY(0) rotate(-45deg);
+    }
+    100% {
+      opacity: 0;
+      transform: translateY(-900px) rotate(-45deg);
+    }
+  }
+  .secret-msg {
+    position: absolute;
+    background: var(--button-bg);
+    color: var(--emerald);
+    font-weight: 600;
+    padding: 6px 10px;
+    border-radius: 12px;
+    box-shadow: 0 4px 8px rgba(50, 80, 40, 0.2);
+    white-space: nowrap;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    font-size: 0.9rem;
+    user-select: none;
+    z-index: 10;
+  }
+  .secret-msg.show {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  /* Confetti container */
+  #confetti {
+    pointer-events: none;
+    position: fixed;
+    top: 0; left: 0;
+    width: 100vw;
+    height: 100vh;
+    overflow: visible;
+    z-index: 1000;
+  }
+
+  /* Music toggle */
+  #musicToggle:hover {
+    background: var(--sage);
+  }
+  #musicToggle svg {
+    width: 24px;
+    height: 24px;
+    fill: var(--emerald);
+  }
+
+  /* Image sidebar */
+#imageSidebar {
+  position: fixed;
+  top: 0;
+  right: 0;
+  width: 180px;
+  height: 100vh;
+  background: var(--mint);
+  border-left: 3px solid var(--emerald);
+  box-shadow: -4px 0 8px rgba(50, 80, 40, 0.2);
+  padding: 10px;
+  overflow-y: auto;
+  z-index: 5;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+#imageSidebar img {
+  width: 100%;
+  border-radius: 12px;
+  box-shadow: 0 4px 10px rgba(70, 110, 60, 0.3);
+  object-fit: cover;
+  cursor: pointer;
+  transition: transform 0.3s ease;
+}
+
+#imageSidebar img:hover {
+  transform: scale(1.05);
+}
+#hoverHint {
+  margin-top: 10px; /* pushes it to the bottom of the sidebar column */
+  text-align: right; /* align text right inside the sidebar */
+  font-weight: 700;
+  color: var(--emerald);
+  font-size: 1.1rem;
+  user-select: none;
+  padding-top: 10px;
+  pointer-events: none; /* so it doesn't block clicking on images */
+}
+
+  /* Middle image viewer */
+  #imageViewer {
+    position: fixed;
+    top: 50%;
+    right: 200px; /* leave space for sidebar */
+    transform: translateY(-50%);
+    width: 300px;
+    max-width: 90vw;
+    max-height: 70vh;
+    background: white;
+    border-radius: 15px;
+    box-shadow: 0 8px 20px rgba(50, 80, 40, 0.25);
+    padding: 1rem;
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+    z-index: 3;
+  }
+  #imageViewer img {
+    max-width: 100%;
+    max-height: 300px;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(70, 110, 60, 0.3);
+    object-fit: contain;
+  }
+  #imageDate {
+    font-weight: 700;
+    color: var(--emerald);
+    font-size: 1.1rem;
+    user-select: none;
+  }
+  #imageDesc {
+    font-size: 0.95rem;
+    color: var(--sage);
+    text-align: center;
+    user-select: none;
+    line-height: 1.3;
+  }
+  #musicControls {
+  display: flex;
+  align-items: center; /* vertical center alignment */
+  gap: 8px; /* space between children */
+  padding: 6px 12px;
+  background: var(--mint);
+  border-radius: 20px;
+  box-shadow: 0 3px 10px rgba(80, 140, 90, 0.4);
+  position: fixed;
+  top: 20px;
+  left: 20px; /* since you want top left */
+  z-index: 3000;
+}
+
+  #musicToggle {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  display: flex;
+  align-items: center;
+}
+
+  #musicToggle svg {
+  width: 24px;
+  height: 24px;
+  fill: var(--emerald);
+}
+
+  #musicControls svg:nth-child(2) {
+  /* second svg is small icon next to button */
+  width: 16px;
+  height: 16px;
+  fill: var(--emerald);
+}
+#reasonsSection {
+  margin-top: 2rem;
+  background: var(--mint);
+  border-radius: 12px;
+  padding: 1.5rem 1rem;
+  color: var(--emerald);
+  box-shadow: 0 6px 15px rgba(74, 119, 75, 0.3);
+  text-align: center;
+}
+
+#reasonsSection h2 {
+  font-size: 1.8rem;
+  margin-bottom: 1rem;
+}
+
+#reasonsList {
+  list-style-type: disc;
+  padding-left: 1.5rem;
+  max-width: 400px;
+  margin: 0 auto;
+  text-align: left;
+  font-size: 1.1rem;
+  line-height: 1.4;
+}
+#heartGrid {
+  display: flex;
+  flex-direction: row;
+  gap: 12px;
+  justify-content: center;
+  align-items: center;
+  max-width: 100%; /* use full width of parent */
+  overflow-x: Visible;
+  overflow-y: Visible;
+  white-space: nowrap;
+  padding: 0 10px; /* some horizontal padding */
+  box-sizing: border-box;
+  flex-wrap: wrap;
+}
+
+#heartGrid button {
+  flex: 0 0 22%;
+  font-size: 2rem; /* a bit smaller */
+  padding: 8px 12px;
+  border-radius: 12px;
+  border: none;
+  background: var(--mint);
+  color: var(--emerald);
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+  cursor: pointer;
+  user-select: none;
+  white-space: nowrap;
+  transition: transform 0.2s ease;
+  max-width: 70px;
+  height: 70px;
+  font-size: 2.5rem;
+}
+#bottomHint {
+  position: fixed;
+  bottom: 15px;
+  width: 100%;
+  text-align: center;
+  font-size: 1.1rem;
+  color: var(--emerald);
+  font-weight: 600;
+  user-select: none;
+  pointer-events: none; /* so it won’t interfere with clicks */
+  z-index: 9999;
+}
+
+</style>
+</head>
+<body>
+
+<div id="heart-container"></div>
+<div id="musicControls" aria-label="Music controls">
+  <button id="musicToggle" aria-pressed="true" aria-label="Pause Music" title="Pause Music">
+    
+  </button>
+  <svg style="width:16px; height:16px; fill: var(--emerald);" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+    <path d="M3 9v6h4l5 5V4L7 9H3z"/>
+  </svg>
+  <input type="range" id="volumeSlider" min="0" max="1" step="0.01" value="0.5" aria-label="Volume control" />
+</div>
+
+<main role="main" aria-live="polite">
+  <h1 id="introMessage">Hey <span id="nameInput" style="min-width:4ch; display:inline-block;">Shannon</span>
+ 💚I've had so much fun and enjoyed talking to you this last month and theres something I've been wanting to tell you</h1>
+
+  <button id="revealBtn" aria-controls="revealMessage" aria-expanded="false" aria-describedby="introMessage">Click to reveal!</button>
+
+  <div id="revealMessage" role="region" aria-live="polite" tabindex="0">
+    Will you be my girlfriend?
+  </div>
+
+  <div id="responseButtons" role="group" aria-label="Response options">
+    <button id="yesBtn">💚 Yes!</button>
+    <button id="notYetBtn">🥲 Not yet...</button>
+  </div>
+
+  <div id="responseMessage" aria-live="polite"></div>
+  <div id="smile" aria-hidden="true">You said yes! Now I’m officially the luckiest person ever. Which means you were wrong... I am that lucky, to have you;-)</div>
+  <section id="reasonsSection" aria-label="Reasons I like her">
+  <h2>Reasons I Like You</h2>
+  <ul id="reasonsList">
+    <li>Your smile brightnes my day</li>
+    <li>Your laugh is contagious</li>
+    <li>Geniune and true to yourself</li>
+	<li>Your Beautiful</li>
+	<li>Your brave enough to change</li>
+	<li>You have a good sense of humor  and you're funny</li>
+	<li>You're kind and caring</li>
+	
+    <!-- Add more reasons here -->
+  </ul>
+</section>
+</main>
+<section id="pickHeartGame" aria-label="Pick a Heart Game" style="
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: white;
+  padding: 1.5rem 2rem;
+  border-radius: 15px;
+  box-shadow: 0 8px 20px rgba(50, 80, 40, 0.25);
+  text-align: center;
+  z-index: 1000;
+  max-width: 400px;
+  width: 90vw;
+">
+  <h2>Pick a Heart 💚</h2>
+  <div id="heartGrid"></div>
+    <!-- Hearts go here -->
+  <div id="heartMessage" style="margin-top: 1rem; font-size: 1.1rem; color: var(--emerald); font-weight: 600; min-height: 3em; user-select: none;"></div>
+</section>
+<section id="stackedPics" aria-label="Pictures of me and her" style="
+  position: fixed;
+  bottom: 200px;
+  left: 67%;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  z-index: 1000;
+  background: var(--background);
+  padding: 10px 20px;
+  border-radius: 15px;
+  box-shadow: 0 6px 15px rgba(74, 119, 75, 0.3);
+  max-width: 200px;
+  width: 90vw;
+">
+  <img src="C:\Users\Raydwan\Desktop\New folder (6)\images\her-picture.jpg" alt="Picture of her" style="width: 100%; border-radius: 12px; box-shadow: 0 4px 10px rgba(70, 110, 60, 0.3); object-fit: cover;" />
+  <img src="C:\Users\Raydwan\Desktop\New folder (6)\images\my-picture.jpg" alt="Picture of me" style="width: 100%; border-radius: 12px; box-shadow: 0 4px 10px rgba(70, 110, 60, 0.3); object-fit: cover;" />
+</section>
+I know its cheesy sorry if you cringe LOL 
+<!-- Middle image viewer -->
+<div id="imageViewer" aria-live="polite" aria-label="Selected memory photo and description">
+  <img src="" alt="Memory photo" id="viewerImg" />
+  <div id="imageDate"></div>
+  <div id="imageDesc"></div>
+</div>
+<div id="bottomHint">Click the floating hearts 💚</div>
+<!-- Sidebar to display images -->
+<div id="imageSidebar" aria-label="Photos">
+  <!-- Images get appended here -->
+  
+  <!-- Add this div inside the sidebar, after the images -->
+  <div id="hoverHint">⬆ Hover images ⬆</div>
+</div>
+<div id="confetti"></div>
+
+<audio id="bgMusic" autoplay loop preload="auto" src="Song.mp3"></audio>
+
+<script>
+  // === Floating hearts code ===
+  const heartContainer = document.getElementById('heart-container');
+
+  const secretMessages = [
+    "You make my heart skip 💚",
+    "Thinking of you always 🍃",
+    "You’re my favorite person 😊",
+    "Every moment with you is magic ✨",
+    "Can’t wait to see your smile! 🌿",
+    "You brighten my days 💫"
+  ];
+
+  function createHeart() {
+    const heart = document.createElement('div');
+    heart.classList.add('heart');
+
+    heart.style.left = Math.random() * (window.innerWidth - 30) + 'px';
+    heart.style.top = window.innerHeight + 30 + 'px';
+
+    const duration = 5000 + Math.random() * 3000;
+    heart.style.animationDuration = duration + 'ms';
+
+    const msg = document.createElement('div');
+    msg.classList.add('secret-msg');
+    msg.textContent = secretMessages[Math.floor(Math.random() * secretMessages.length)];
+    heartContainer.appendChild(msg);
+
+    msg.style.left = '0px';
+    msg.style.top = '0px';
+
+    let msgVisible = false;
+    heart.addEventListener('click', (e) => {
+      e.stopPropagation();
+
+      if (!msgVisible) {
+        const rect = heart.getBoundingClientRect();
+        msg.style.left = (rect.left + rect.width / 2) + 'px';
+        msg.style.top = (rect.top - 35) + 'px';
+        msg.classList.add('show');
+        heart.style.animationPlayState = 'paused';
+        msgVisible = true;
+      } else {
+        msg.classList.remove('show');
+        heart.style.animationPlayState = 'running';
+        msgVisible = false;
+      }
+    });
+
+    heart.addEventListener('animationend', () => {
+      msg.remove();
+      heart.remove();
+    });
+
+    heartContainer.appendChild(heart);
+  }
+  setInterval(createHeart, 100);
+
+  // === Main buttons interaction ===
+  const revealBtn = document.getElementById('revealBtn');
+  const revealMessage = document.getElementById('revealMessage');
+  const responseButtons = document.getElementById('responseButtons');
+  const yesBtn = document.getElementById('yesBtn');
+  const notYetBtn = document.getElementById('notYetBtn');
+  const responseMessage = document.getElementById('responseMessage');
+  const smile = document.getElementById('smile');
+
+  revealBtn.addEventListener('click', () => {
+    revealMessage.style.display = 'block';
+    revealBtn.setAttribute('aria-expanded', 'true');
+    responseButtons.style.display = 'flex';
+    revealBtn.style.display = 'none';
+    revealMessage.focus();
+  });
+
+  function confettiBurst() {
+    const confettiContainer = document.getElementById('confetti');
+    const colors = ['#A8D5BA', '#8CAE7E', '#4A774B', '#B8D8C0', '#C8E6C9'];
+    const count = 80;
+    for(let i=0; i<count; i++) {
+      const confetti = document.createElement('div');
+      confetti.style.position = 'fixed';
+      confetti.style.width = '8px';
+      confetti.style.height = '8px';
+      confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+      confetti.style.left = Math.random() * window.innerWidth + 'px';
+      confetti.style.top = Math.random() * window.innerHeight + 'px';
+      confetti.style.opacity = '1';
+      confetti.style.borderRadius = '2px';
+      confetti.style.transform = `rotate(${Math.random()*360}deg)`;
+      confetti.style.pointerEvents = 'none';
+      confetti.style.zIndex = '1000';
+      confettiContainer.appendChild(confetti);
+
+      const animDuration = 1500 + Math.random()*1500;
+      confetti.animate([
+        { transform: `translateY(0) rotate(${Math.random()*360}deg)`, opacity: 1 },
+        { transform: `translateY(-100px) rotate(${Math.random()*720}deg)`, opacity: 0 }
+      ], { duration: animDuration, easing: 'ease-out' });
+
+      setTimeout(() => confetti.remove(), animDuration);
+    }
+  }
+
+  yesBtn.addEventListener('click', () => {
+    responseMessage.textContent = '';
+    smile.classList.add('show');
+    confettiBurst();
+  });
+
+  notYetBtn.addEventListener('click', () => {
+    smile.classList.remove('show');
+    responseMessage.textContent = "FUCKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKK 😭😭😭😭😭😭";
+  });
+
+  // === Background music toggle ===
+const musicToggle = document.getElementById('musicToggle');
+const volumeSlider = document.getElementById('volumeSlider');
+const volumeIcon = document.getElementById('volumeIcon');
+const soundWave1 = document.getElementById('soundWave1');
+const soundWave2 = document.getElementById('soundWave2');
+const speakerIcon = document.getElementById('speakerIcon');
+const bgMusic = document.getElementById('bgMusic');
+
+function playMusicOnInteraction() {
+  bgMusic.play().catch(() => {
+    // Handle any error, optional
+  });
+  // Remove listener so it only triggers once
+  document.removeEventListener('click', playMusicOnInteraction);
+}
+
+// Wait for any click on the page to start music
+document.addEventListener('click', playMusicOnInteraction, { once: true });
+
+// Initialize volume
+bgMusic.volume = volumeSlider.value;
+
+// Toggle play/pause
+musicToggle.addEventListener('click', () => {
+  if (bgMusic.paused) {
+    bgMusic.play();
+    musicToggle.setAttribute('aria-pressed', 'true');
+    musicToggle.title = 'Pause Music';
+    soundWave1.style.display = '';
+    soundWave2.style.display = '';
+  } else {
+    bgMusic.pause();
+    musicToggle.setAttribute('aria-pressed', 'false');
+    musicToggle.title = 'Play Music';
+    soundWave1.style.display = 'none';
+    soundWave2.style.display = 'none';
+  }
+});
+
+// Volume control
+volumeSlider.addEventListener('input', () => {
+  bgMusic.volume = volumeSlider.value;
+
+  if (volumeSlider.value == 0) {
+    soundWave1.style.display = 'none';
+    soundWave2.style.display = 'none';
+    if (!bgMusic.paused) bgMusic.pause();
+  } else {
+    soundWave1.style.display = '';
+    soundWave2.style.display = '';
+    if (bgMusic.paused) bgMusic.play();
+  }
+});
+
+
+  // === Load images in sidebar and handle clicks ===
+  const imageSidebar = document.getElementById('imageSidebar');
+  const hoverHint = document.getElementById('hoverHint');
+  const viewerImg = document.getElementById('viewerImg');
+  const imageDate = document.getElementById('imageDate');
+  const imageDesc = document.getElementById('imageDesc');
+
+  // *** UPDATE THIS ARRAY WITH YOUR ACTUAL IMAGE FILE NAMES ***
+  const imageFiles = [
+    "image11111.png",
+    "image22222.png",
+    "image33333.png",
+	"image44444.png",
+	"image55555.png",
+	"image66666.png",
+	"image77777.png",
+	"image88888.png"
+  ];
+
+  // *** UPDATE THIS ARRAY WITH CORRESPONDING DATES AND DESCRIPTIONS ***
+  const imageDetails = [
+    {
+      date: "July 7, 2025",
+      desc: "SQUID GAMEEE FITT CHECKKK 🗣 "
+    },
+    {
+      date: "July 7, 2025",
+      desc: "That day we played squid-game was so fire had many laughs. this was moments before we got eliminated... but we did cook them in Tug Of War LOL"
+    },
+    {
+      date: "July 4th, 2025",
+      desc: "I remember us being so autistic and saying brainrot things to each other this entire arena game, really enjoyed it <3"
+    },
+	{
+	  date: "June 19th, 2025",
+	  desc: "I wasn't here for this, but i rmb thinking it was cute how proud you were of the win, and i was too! The tft goat <3"
+	},
+	{
+	  date: "July 6th, 2025",
+	  desc: "This was so funny, you screenshotted it and said proof im winner you fruit 😭. You said i wouldn't have believed you won"
+	},
+	{
+	  date: "June 12th, 2025",
+	  desc: "You clutched and carried so hard this game, we also made brainrot noises this day, when i first noticed i was smiling alot around you <3"
+	},
+	{
+	  date: "July 13th, 2025",
+	  desc: "GET JIGGYYYYY 🕺💃"
+	},
+	{
+	  date: "July 8th, 2025",
+	  desc: "I was actually dying when i saw this your, your fortnite was bugged so you were just playing windowed LOL"
+	},
+  ];
+
+
+  function showImage(index) {
+    if (index < 0 || index >= imageFiles.length) return;
+    viewerImg.src = `images/${imageFiles[index]}`;
+    viewerImg.alt = `Memory photo ${index + 1}`;
+    imageDate.textContent = imageDetails[index].date;
+    imageDesc.textContent = imageDetails[index].desc;
+  }
+
+  // Initialize sidebar images
+const imageViewer = document.getElementById('imageViewer');
+
+imageFiles.forEach((file, i) => {
+  const img = document.createElement('img');
+  img.src = `images/${file}`;
+  img.alt = `Photo ${i + 1}`;
+  img.tabIndex = 0;
+  
+  img.addEventListener('mouseenter', () => {
+    showImage(i);
+
+    const rect = img.getBoundingClientRect();
+    imageViewer.style.position = 'fixed';
+    imageViewer.style.right = '200px'; // same as your sidebar offset
+    imageViewer.style.top = `${rect.top}px`;
+    imageViewer.style.transform = 'none'; // override CSS translateY(-50%)
+    imageViewer.style.display = 'flex';
+  });
+
+  img.addEventListener('mouseleave', () => {
+    imageViewer.style.display = 'none';
+  });
+
+  img.addEventListener('focus', () => {
+    showImage(i);
+
+    const rect = img.getBoundingClientRect();
+    imageViewer.style.position = 'fixed';
+    imageViewer.style.right = '200px';
+    imageViewer.style.top = `${rect.top}px`;
+    imageViewer.style.transform = 'none';
+    imageViewer.style.display = 'flex';
+  });
+
+  img.addEventListener('blur', () => {
+    imageViewer.style.display = 'none';
+  });
+
+  imageSidebar.insertBefore(img, hoverHint);
+});
+  // Show first image by default
+  //showImage(0);
+
+ const heartMessages = [
+  "You have the most beautiful smile!",
+  "Your laugh brightens my day.",
+  "I love how kind you are to everyone.",
+  "You're incredibly smart and funny.",
+  "You make even ordinary moments special.",
+  "Your creativity inspires me.",
+  "I admire your confidence and strength.",
+  "You always know how to cheer me up!"
+];
+
+const heartGrid = document.getElementById('heartGrid');
+const heartMessage = document.getElementById('heartMessage');
+
+heartMessages.forEach((msg, i) => {
+  const heart = document.createElement('button');
+  heart.textContent = '💚';
+  heart.style.fontSize = '2.5rem';
+  heart.style.border = 'none';
+  heart.style.background = 'transparent';
+  heart.style.cursor = 'pointer';
+  heart.style.transition = 'transform 0.2s ease';
+  heart.style.userSelect = 'none';
+
+  heart.addEventListener('mouseenter', () => {
+    heart.style.transform = 'scale(1.3)';
+  });
+  heart.addEventListener('mouseleave', () => {
+    heart.style.transform = 'scale(1)';
+  });
+
+  heart.addEventListener('click', () => {
+    heartMessage.textContent = msg;
+    heart.disabled = true;
+    heart.style.opacity = '0.4';
+    heart.style.cursor = 'default';
+  });
+
+  heartGrid.appendChild(heart);
+});
+</script>
+</body>
+</html>
